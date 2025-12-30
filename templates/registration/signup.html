@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sign Up 🍔</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url("/static/images/signup-bg.jpg") no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        form {
+            background-color: rgba(255,255,255,0.9);
+            padding: 30px;
+            border-radius: 15px;
+            width: 350px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+        h2 {
+            text-align: center;
+            color: #ff6600;
+            margin-bottom: 20px;
+        }
+        input[type=text], input[type=password] {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 15px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #ff6600;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #e65c00;
+        }
+        p {
+            text-align: center;
+            margin-top: 15px;
+        }
+        a {
+            color: #ff6600;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <form method="post">
+        {% csrf_token %}
+        <h2>Sign Up 🍕</h2>
+        {{ form.as_p }}
+        <button type="submit">Sign Up</button>
+        <p>Already have an account? <a href="{% url 'login' %}">Login 🌯</a></p>
+    </form>
+</body>
+</html>

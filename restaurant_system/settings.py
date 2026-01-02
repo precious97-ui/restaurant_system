@@ -119,7 +119,9 @@ USE_TZ = True
 import os
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # your dev static folder
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')    # folder for collectstatic
-LOGIN_REDIRECT_URL = '/dashboard/'  # where user goes after login
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # dev static folder
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')    # for collectstatic
+
+# ✅ AUTH REDIRECTS (use URL NAMES, not hard paths)
+LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'

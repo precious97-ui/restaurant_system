@@ -2,60 +2,93 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Your Cart 🛒</title>
+    <title>🛒 Your Cart - Foody</title>
     <style>
-        body { font-family: Arial, sans-serif; background:#fff8f0; margin:0; }
-        header { background:#ff6600; color:white; padding:25px; text-align:center; font-size:28px; font-weight:bold; letter-spacing:1px; }
-        table { width: 90%; margin: 20px auto; border-collapse: collapse; }
-        th, td { border:1px solid #ccc; padding:10px; text-align:center; }
-        th { background:#ff6600; color:white; }
-        button { padding:8px 12px; background:#ff6600; color:white; border:none; border-radius:5px; cursor:pointer; }
+        body { font-family: Arial, sans-serif; background: #fff8f0; margin:0; }
+        header {
+            background: #ff6600;
+            color: white;
+            padding: 25px;
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            position: relative;
+        }
+        header a.dashboard-btn {
+            position: absolute;
+            left: 20px;
+            top: 25px;
+            background: white;
+            color: #ff6600;
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .container { padding: 30px; max-width: 900px; margin: auto; }
+        .cart-item { background:white; padding:20px; border-radius:15px; box-shadow:0 5px 15px rgba(0,0,0,0.15); margin-bottom:20px; display:flex; justify-content: space-between; align-items: center; }
+        .cart-item-details { flex:1; }
+        h3 { color: #ff6600; margin-bottom:10px; }
+        p { margin:5px 0; }
+        button { padding:8px 15px; background:#ff6600; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; margin-left:10px; }
         button:hover { background:#e65c00; }
-        footer { text-align:center; padding:20px; background:#ffebd6; border-top:2px solid #ff9900; font-weight:bold; color:#ff6600; position: fixed; width:100%; bottom:0; }
-        a { text-decoration:none; color:#ff6600; font-weight:bold; }
+        .checkout-btn { width:100%; padding:12px; margin-top:20px; font-size:18px; border-radius:7px; }
+        .messages { margin: 20px auto; max-width: 600px; }
+        .messages div { padding: 10px 15px; border-radius: 5px; margin-bottom: 10px; font-weight:bold; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #cce5ff; color: #004085; border: 1px solid #b8daff; }
     </style>
 </head>
 <body>
 
-<header>🛒 Your Cart</header>
+<header>
+    🛒 Your Cart
+    <a href="{% url 'dashboard' %}" class="dashboard-btn">🏠 Dashboard</a>
+</header>
 
-{% if items %}
-<table>
-    <tr>
-        <th>Food Item</th>
-        <th>Qty</th>
-        <th>Spice 🌶️</th>
-        <th>Salt 🧂</th>
-        <th>Notes ✍️</th>
-        <th>Remove</th>
-    </tr>
-    {% for item in items %}
-    <tr>
-        <td>{{ item.food_item }}</td>
-        <td>{{ item.quantity }}</td>
-        <td>{{ item.spice_level }}</td>
-        <td>{{ item.salt_level }}</td>
-        <td>{{ item.notes }}</td>
-        <td>
-            <form method="post" action="{% url 'remove_from_cart' item.id %}">
-                {% csrf_token %}
-                <button type="submit">❌</button>
-            </form>
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+<!-- Django messages -->
+<div class="messages">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="{% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
 
-<form method="post" action="{% url 'checkout' %}" style="text-align:center; margin-top:20px;">
-    {% csrf_token %}
-    <button type="submit">✅ Checkout All</button>
-</form>
+<div class="container">
 
-{% else %}
-<p style="text-align:center; margin-top:50px;">Your cart is empty. <a href="{% url 'dashboard' %}">Go back to dashboard</a></p>
-{% endif %}
+    {% if cart_items %}
+        {% for item in cart_items %}
+            <div class="cart-item">
+                <div class="cart-item-details">
+                    <h3>{{ item.food_item }} x{{ item.quantity }}</h3>
+                    <p>Spice: {{ item.spice_level }}, Salt: {{ item.salt_level }}</p>
+                    {% if item.notes %}<p>Notes: {{ item.notes }}</p>{% endif %}
+                </div>
+                <div>
+                    <form method="post" action="{% url 'remove_from_cart' item.id %}">
+                        {% csrf_token %}
+                        <button type="submit">❌ Remove</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
 
-<footer>Created by Team Foody 🍔 2026</footer>
+        <!-- Checkout button -->
+        <form method="post" action="{% url 'checkout' %}">
+            {% csrf_token %}
+            <button type="submit" class="checkout-btn">🎉 Checkout All Items</button>
+        </form>
+
+    {% else %}
+        <p style="text-align:center; font-size:18px; margin-top:50px;">Your cart is empty! 😔</p>
+    {% endif %}
+
+</div>
 
 </body>
 </html>

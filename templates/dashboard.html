@@ -17,7 +17,6 @@
         }
         header a.cart-btn {
             position: absolute;
-            right: 20px;
             top: 25px;
             background: white;
             color: #ff6600;
@@ -26,6 +25,9 @@
             text-decoration: none;
             font-weight: bold;
         }
+        header a.cart-btn.cart { right: 20px; }       /* Cart button */
+        header a.cart-btn.orders { right: 140px; }   /* Orders button */
+        
         .container { padding: 30px; display:grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap:25px; }
         .card { background:white; padding:20px; border-radius:15px; box-shadow:0 5px 15px rgba(0,0,0,0.15); transition: transform 0.2s; }
         .card:hover { transform: scale(1.03); }
@@ -36,17 +38,36 @@
         button { width:100%; padding:12px; background-color:#ff6600; color:white; border:none; border-radius:7px; cursor:pointer; font-size:16px; font-weight:bold; margin-top:5px; transition: background 0.2s; }
         button:hover { background-color:#e65c00; }
         footer { text-align:center; padding:20px; background:#ffebd6; border-top:2px solid #ff9900; font-weight:bold; color:#ff6600; position: fixed; width:100%; bottom:0; }
+
+        /* Optional: display messages */
+        .messages { margin: 20px auto; max-width: 600px; }
+        .messages div { padding: 10px 15px; border-radius: 5px; margin-bottom: 10px; font-weight:bold; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #cce5ff; color: #004085; border: 1px solid #b8daff; }
     </style>
 </head>
 <body>
 
 <header>
     🍔 Foody Dashboard
-    <a href="{% url 'cart' %}" class="cart-btn">🛒 Cart</a>
+    <a href="{% url 'cart' %}" class="cart-btn cart">🛒 Cart</a>
+    <a href="{% url 'order_history' %}" class="cart-btn orders">📜 Orders</a>
 </header>
 
+<!-- Display Django messages -->
+<div class="messages">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="{% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
 <div class="container">
-    <!-- Food Item Example -->
+    <!-- Food Item: Classic Burger -->
     <div class="card">
         <h3>🍔 Classic Burger</h3>
         <form method="post" action="{% url 'add_to_cart' %}">
@@ -64,7 +85,7 @@
         </form>
     </div>
 
-    <!-- Repeat for other food items -->
+    <!-- Food Item: Margherita Pizza -->
     <div class="card">
         <h3>🍕 Margherita Pizza</h3>
         <form method="post" action="{% url 'add_to_cart' %}">
@@ -78,6 +99,7 @@
         </form>
     </div>
 
+    <!-- Food Item: Caesar Salad -->
     <div class="card">
         <h3>🥗 Caesar Salad</h3>
         <form method="post" action="{% url 'add_to_cart' %}">
@@ -90,7 +112,6 @@
             <button type="submit">Add to Cart 🍽️</button>
         </form>
     </div>
-
 </div>
 
 <footer>

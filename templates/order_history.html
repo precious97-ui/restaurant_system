@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Orders 🍔</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #fff8f0; margin: 0; padding: 0;}
+        header { background: #ff6600; color: white; padding: 20px; text-align: center; font-size: 28px; font-weight: bold;}
+        .container { padding: 30px; max-width: 800px; margin: auto;}
+        table { width: 100%; border-collapse: collapse; margin-top: 20px;}
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: center;}
+        th { background: #ff6600; color: white;}
+        tr:nth-child(even) { background: #fff3e0; }
+        footer { text-align: center; padding: 20px; background:#ffebd6; border-top:2px solid #ff9900; font-weight:bold; color:#ff6600; position: fixed; width:100%; bottom:0;}
+    </style>
+</head>
+<body>
+
+<header>🍔 My Orders</header>
+
+<div class="container">
+    {% if orders %}
+    <table>
+        <thead>
+            <tr>
+                <th>Food Item</th>
+                <th>Quantity</th>
+                <th>Spice 🌶️</th>
+                <th>Salt 🧂</th>
+                <th>Notes</th>
+                <th>Date Ordered</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.food_item }}</td>
+                <td>{{ order.quantity }}</td>
+                <td>{{ order.spice_level }}</td>
+                <td>{{ order.salt_level }}</td>
+                <td>{{ order.notes|default:"-" }}</td>
+                <td>{{ order.created_at|date:"d M Y H:i" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p style="text-align:center; font-weight:bold; margin-top:20px;">You have no past orders.</p>
+    {% endif %}
+</div>
+
+<footer>
+    Created by Team Foody 🍔 2026
+</footer>
+
+</body>
+</html>

@@ -4,7 +4,9 @@ from django.contrib.auth import login, authenticate
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .models import Order, CartItem  # make sure CartItem model exists in models.py
+from .models import Order, CartItem  # make sure both are in models.py
+from .models import Order
+
 
 # -----------------------------
 # SIGNUP VIEW
@@ -12,7 +14,6 @@ from .models import Order, CartItem  # make sure CartItem model exists in models
 def signup(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
-
         username = request.POST.get('username')
 
         # Check if username already exists
@@ -24,9 +25,9 @@ def signup(request):
             user = form.save()
             login(request, user)  # auto-login after signup
             messages.success(request, f"🎉 Welcome, {username}! Your account has been created.")
-            return redirect('dashboard')  # redirect to dashboard
+            return redirect('dashboard')
         else:
-            # show form validation errors
+            # Show form validation errors
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(request, f"{field.capitalize()}: {error}")
@@ -42,11 +43,12 @@ def signup(request):
 # -----------------------------
 @login_required
 def dashboard(request):
+    # You can later pass cart counts or recommendations here
     return render(request, 'dashboard.html')
 
 
 # -----------------------------
-# PLACE ORDER VIEW
+# PLACE ORDER (Add to Cart)
 # -----------------------------
 @login_required
 def place_order(request):
@@ -57,51 +59,33 @@ def place_order(request):
         salt_level = request.POST.get('salt_level')
         notes = request.POST.get('notes')
 
-        # Save order to database
-        Order.objects.create(
-            user=request.user,
-            food_item=food_item,
-            quantity=quantity,
-            spice_level=spice_level,
-            salt_level=salt_level,
-            notes=notes
-        )
-
-        messages.success(request, f"✅ Your order for {food_item} has been placed!")
-        return redirect('dashboard')
-
-
-# -----------------------------
-# CART VIEWS
-# -----------------------------
-@login_required
-def view_cart(request):
-    items = CartItem.objects.filter(user=request.user, ordered=False)
-    return render(request, 'cart.html', {'items': items})
-
-
-@login_required
-def add_to_cart(request):
-    if request.method == 'POST':
-        food_item = request.POST.get('food_item')
-        quantity = int(request.POST.get('quantity', 1))
-        spice_level = request.POST.get('spice_level')
-        salt_level = request.POST.get('salt_level')
-        notes = request.POST.get('notes')
-
+        # Save to CartItem
         CartItem.objects.create(
             user=request.user,
             food_item=food_item,
             quantity=quantity,
             spice_level=spice_level,
             salt_level=salt_level,
-            notes=notes
+            notes=notes,
+            ordered=False
         )
 
-        messages.success(request, f"🛒 {food_item} added to cart!")
+        messages.success(request, f"✅ '{food_item}' has been added to your cart!")
     return redirect('dashboard')
 
 
+# -----------------------------
+# VIEW CART
+# -----------------------------
+@login_required
+def cart(request):
+    items = CartItem.objects.filter(user=request.user, ordered=False)
+    return render(request, 'cart.html', {'cart_items': items})
+
+
+# -----------------------------
+# REMOVE FROM CART
+# -----------------------------
 @login_required
 def remove_from_cart(request, item_id):
     try:
@@ -113,6 +97,9 @@ def remove_from_cart(request, item_id):
     return redirect('cart')
 
 
+# -----------------------------
+# CHECKOUT
+# -----------------------------
 @login_required
 def checkout(request):
     items = CartItem.objects.filter(user=request.user, ordered=False)
@@ -120,16 +107,22 @@ def checkout(request):
         for item in items:
             item.ordered = True
             item.save()
+            # Optional: save to Orders for history
+            Order.objects.create(
+                user=item.user,
+                food_item=item.food_item,
+                quantity=item.quantity,
+                spice_level=item.spice_level,
+                salt_level=item.salt_level,
+                notes=item.notes
+            )
         messages.success(request, "🎉 Your order has been placed successfully!")
     else:
         messages.info(request, "Your cart is empty!")
     return redirect('dashboard')
 
-
 @login_required
-def cart(request):
-    # Query all CartItems that belong to the logged-in user and are not yet ordered
-    from .models import CartItem
-    cart_items = CartItem.objects.filter(user=request.user, ordered=False)
-    
-    return render(request, 'cart.html', {'cart_items': cart_items})
+def order_history(request):
+    # Get all orders for the logged-in user
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'order_history.html', {'orders': orders})

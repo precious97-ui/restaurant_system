@@ -1,15 +1,23 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 # -----------------------------
 # ORDER MODEL
 # -----------------------------
 class Order(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('preparing', 'Preparing'),
+        ('delivered', 'Delivered'),
+    ]
+
     SPICE_CHOICES = [
         ('Low', 'Low'),
         ('Medium', 'Medium'),
         ('Hot', 'Hot')
     ]
+
     SALT_CHOICES = [
         ('Low', 'Low'),
         ('Normal', 'Normal'),
@@ -22,10 +30,15 @@ class Order(models.Model):
     spice_level = models.CharField(max_length=10, choices=SPICE_CHOICES)
     salt_level = models.CharField(max_length=10, choices=SALT_CHOICES)
     notes = models.TextField(blank=True, null=True)
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.food_item} x{self.quantity}"
+        return f"{self.user.username} - {self.food_item} ({self.status})"
 
 
 # -----------------------------
@@ -37,6 +50,7 @@ class CartItem(models.Model):
         ('Medium', 'Medium'),
         ('Hot', 'Hot')
     ]
+
     SALT_CHOICES = [
         ('Low', 'Low'),
         ('Normal', 'Normal'),
@@ -53,4 +67,5 @@ class CartItem(models.Model):
     added_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.food_item} x{self.quantity} ({'Ordered' if self.ordered else 'In Cart'})"
+        status = "Ordered" if self.ordered else "In Cart"
+        return f"{self.user.username} - {self.food_item} x{self.quantity} ({status})"

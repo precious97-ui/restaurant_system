@@ -31,7 +31,8 @@
         .container { padding: 30px; display:grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap:25px; }
         .card { background:white; padding:20px; border-radius:15px; box-shadow:0 5px 15px rgba(0,0,0,0.15); transition: transform 0.2s; }
         .card:hover { transform: scale(1.03); }
-        h3 { color: #ff6600; margin-bottom:15px; text-align:center; }
+        h3 { color: #ff6600; margin-bottom:5px; text-align:center; }
+        .price { text-align:center; font-weight:bold; color:#333; margin-bottom:10px; }
         label { display:block; margin:10px 0 5px; font-weight:bold; }
         input[type=number], select, textarea { width:100%; padding:8px; border-radius:5px; border:1px solid #ccc; margin-bottom:10px; font-size:14px; }
         textarea { resize: vertical; }
@@ -67,51 +68,43 @@
 </div>
 
 <div class="container">
-    <!-- Food Item: Classic Burger -->
+    {% for item in menu_items %}
     <div class="card">
-        <h3>🍔 Classic Burger</h3>
+        <h3>{{ item.name }}</h3>
+        {% if item.description %}
+        <p style="text-align:center; font-size:14px; color:#555;">{{ item.description }}</p>
+        {% endif %}
+        <p class="price">Price: ${{ item.price }}</p>
         <form method="post" action="{% url 'add_to_cart' %}">
             {% csrf_token %}
-            <input type="hidden" name="food_item" value="Classic Burger">
+            <input type="hidden" name="food_item" value="{{ item.name }}">
+            
             <label>Quantity</label>
             <input type="number" name="quantity" min="1" value="1">
+            
             <label>Spice Level 🌶️</label>
-            <select name="spice_level"><option>Low</option><option>Medium</option><option>Hot</option></select>
+            <select name="spice_level">
+                <option {% if item.default_spice == "Low" %}selected{% endif %}>Low</option>
+                <option {% if item.default_spice == "Medium" %}selected{% endif %}>Medium</option>
+                <option {% if item.default_spice == "Hot" %}selected{% endif %}>Hot</option>
+            </select>
+            
             <label>Salt Level 🧂</label>
-            <select name="salt_level"><option>Low</option><option>Normal</option><option>Extra</option></select>
+            <select name="salt_level">
+                <option {% if item.default_salt == "Low" %}selected{% endif %}>Low</option>
+                <option {% if item.default_salt == "Normal" %}selected{% endif %}>Normal</option>
+                <option {% if item.default_salt == "Extra" %}selected{% endif %}>Extra</option>
+            </select>
+            
             <label>Extra Notes ✍️</label>
-            <textarea name="notes" rows="3" placeholder="No onions, extra cheese..."></textarea>
+            <textarea name="notes" rows="3" placeholder="Any notes..."></textarea>
+            
             <button type="submit">Add to Cart 🍽️</button>
         </form>
     </div>
-
-    <!-- Food Item: Margherita Pizza -->
-    <div class="card">
-        <h3>🍕 Margherita Pizza</h3>
-        <form method="post" action="{% url 'add_to_cart' %}">
-            {% csrf_token %}
-            <input type="hidden" name="food_item" value="Margherita Pizza">
-            <label>Quantity</label><input type="number" name="quantity" min="1" value="1">
-            <label>Spice Level 🌶️</label><select name="spice_level"><option>Low</option><option>Medium</option><option>Hot</option></select>
-            <label>Salt Level 🧂</label><select name="salt_level"><option>Low</option><option>Normal</option><option>Extra</option></select>
-            <label>Extra Notes ✍️</label><textarea name="notes" rows="3" placeholder="Gluten-free crust, extra cheese..."></textarea>
-            <button type="submit">Add to Cart 🍽️</button>
-        </form>
-    </div>
-
-    <!-- Food Item: Caesar Salad -->
-    <div class="card">
-        <h3>🥗 Caesar Salad</h3>
-        <form method="post" action="{% url 'add_to_cart' %}">
-            {% csrf_token %}
-            <input type="hidden" name="food_item" value="Caesar Salad">
-            <label>Quantity</label><input type="number" name="quantity" min="1" value="1">
-            <label>Spice Level 🌶️</label><select name="spice_level"><option>Low</option><option>Medium</option><option>Hot</option></select>
-            <label>Salt Level 🧂</label><select name="salt_level"><option>Low</option><option>Normal</option><option>Extra</option></select>
-            <label>Extra Notes ✍️</label><textarea name="notes" rows="3" placeholder="No croutons, add chicken..."></textarea>
-            <button type="submit">Add to Cart 🍽️</button>
-        </form>
-    </div>
+    {% empty %}
+    <p>No menu items available.</p>
+    {% endfor %}
 </div>
 
 <footer>

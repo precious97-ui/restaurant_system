@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-
 # -----------------------------
 # ORDER MODEL
 # -----------------------------
@@ -69,3 +68,21 @@ class CartItem(models.Model):
     def __str__(self):
         status = "Ordered" if self.ordered else "In Cart"
         return f"{self.user.username} - {self.food_item} x{self.quantity} ({status})"
+
+
+# -----------------------------
+# MENU ITEM MODEL
+# -----------------------------
+class MenuItem(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True, null=True)
+    price = models.DecimalField(max_digits=6, decimal_places=2)
+    spice_level_choices = [('Low', 'Low'), ('Medium', 'Medium'), ('Hot', 'Hot')]
+    salt_level_choices = [('Low', 'Low'), ('Normal', 'Normal'), ('Extra', 'Extra')]
+    default_spice = models.CharField(max_length=10, choices=spice_level_choices, default='Medium')
+    default_salt = models.CharField(max_length=10, choices=salt_level_choices, default='Normal')
+    image_url = models.URLField(blank=True, null=True)  # optional image for menu
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name

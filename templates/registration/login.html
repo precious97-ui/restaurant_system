@@ -13,7 +13,7 @@
             height: 100vh;
         }
         form {
-            background-color: rgba(255,255,255,0.9);
+            background-color: rgba(255,255,255,0.95);
             padding: 30px;
             border-radius: 15px;
             width: 350px;
@@ -44,6 +44,12 @@
         button:hover {
             background-color: #e65c00;
         }
+        .error {
+            color: red;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
         p {
             text-align: center;
             margin-top: 15px;
@@ -55,10 +61,21 @@
     </style>
 </head>
 <body>
-    <form method="post">
+    <form method="post" action="{% url 'login' %}">
         {% csrf_token %}
         <h2>Login 🍕</h2>
-        {{ form.as_p }}
+
+        <!-- show form errors -->
+        {% if form.errors %}
+            <div class="error">❌ Invalid username or password</div>
+        {% endif %}
+
+        <!-- username and password fields with proper names -->
+        <label>Username</label>
+        <input type="text" name="username" placeholder="Enter username" required>
+        <label>Password</label>
+        <input type="password" name="password" placeholder="Enter password" required>
+
         <button type="submit">Login</button>
         <p>Don't have an account? <a href="{% url 'signup' %}">Sign up 🌯</a></p>
     </form>

@@ -17,14 +17,16 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import redirect
+from accounts import views
 
 def home(request):
-    return redirect('/accounts/login/')
+    return redirect('accounts/login/')
 
 urlpatterns = [
     path('', home),  # default redirects to login
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('accounts/', include('accounts.urls')),  # signup view
+    path('dashboard/', views.dashboard, name='dashboard')
 
 ]

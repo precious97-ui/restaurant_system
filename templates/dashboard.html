@@ -1,181 +1,101 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Foody Dashboard 🍽️</title>
     <style>
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: #fff7f0;
-        }
-
+        body { font-family: Arial, sans-serif; background: #fff8f0; margin:0; }
         header {
-            background: linear-gradient(135deg, #ff6600, #ff3300);
+            background: #ff6600;
             color: white;
             padding: 25px;
             text-align: center;
             font-size: 28px;
             font-weight: bold;
+            letter-spacing: 1px;
+            position: relative;
         }
-
-        .container {
-            padding: 30px;
-        }
-
-        .welcome {
-            font-size: 22px;
-            margin-bottom: 25px;
-        }
-
-        .menu {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 25px;
-        }
-
-        .card {
+        header a.cart-btn {
+            position: absolute;
+            right: 20px;
+            top: 25px;
             background: white;
-            border-radius: 18px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            padding: 20px;
-            transition: transform 0.2s;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .card h3 {
-            color: #ff5500;
-            margin-bottom: 10px;
-        }
-
-        .price {
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        label {
-            display: block;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-
-        select, input, textarea {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-        }
-
-        textarea {
-            resize: none;
-        }
-
-        button {
-            margin-top: 15px;
-            width: 100%;
-            padding: 12px;
-            background: #ff6600;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #e65500;
-        }
-
-        .logout {
-            margin-top: 30px;
-            text-align: center;
-        }
-
-        .logout a {
-            color: #ff3300;
-            font-weight: bold;
+            color: #ff6600;
+            padding: 10px 15px;
+            border-radius: 8px;
             text-decoration: none;
+            font-weight: bold;
         }
+        .container { padding: 30px; display:grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap:25px; }
+        .card { background:white; padding:20px; border-radius:15px; box-shadow:0 5px 15px rgba(0,0,0,0.15); transition: transform 0.2s; }
+        .card:hover { transform: scale(1.03); }
+        h3 { color: #ff6600; margin-bottom:15px; text-align:center; }
+        label { display:block; margin:10px 0 5px; font-weight:bold; }
+        input[type=number], select, textarea { width:100%; padding:8px; border-radius:5px; border:1px solid #ccc; margin-bottom:10px; font-size:14px; }
+        textarea { resize: vertical; }
+        button { width:100%; padding:12px; background-color:#ff6600; color:white; border:none; border-radius:7px; cursor:pointer; font-size:16px; font-weight:bold; margin-top:5px; transition: background 0.2s; }
+        button:hover { background-color:#e65c00; }
+        footer { text-align:center; padding:20px; background:#ffebd6; border-top:2px solid #ff9900; font-weight:bold; color:#ff6600; position: fixed; width:100%; bottom:0; }
     </style>
 </head>
 <body>
 
 <header>
-    🍔 Foody Restaurant Dashboard
+    🍔 Foody Dashboard
+    <a href="{% url 'cart' %}" class="cart-btn">🛒 Cart</a>
 </header>
 
 <div class="container">
-    <div class="welcome">
-        Welcome 👋 You are logged in.
-    </div>
-
-    <div class="menu">
-
-        <!-- FOOD CARD -->
-        <div class="card">
-            <h3>Classic Burger 🍔</h3>
-            <div class="price">Price: $5.00</div>
-
+    <!-- Food Item Example -->
+    <div class="card">
+        <h3>🍔 Classic Burger</h3>
+        <form method="post" action="{% url 'add_to_cart' %}">
+            {% csrf_token %}
+            <input type="hidden" name="food_item" value="Classic Burger">
             <label>Quantity</label>
-            <input type="number" min="1" value="1">
-
+            <input type="number" name="quantity" min="1" value="1">
             <label>Spice Level 🌶️</label>
-            <select>
-                <option>Low</option>
-                <option>Medium</option>
-                <option>Hot</option>
-            </select>
-
+            <select name="spice_level"><option>Low</option><option>Medium</option><option>Hot</option></select>
             <label>Salt Level 🧂</label>
-            <select>
-                <option>Low</option>
-                <option>Normal</option>
-                <option>Extra</option>
-            </select>
-
+            <select name="salt_level"><option>Low</option><option>Normal</option><option>Extra</option></select>
             <label>Extra Notes ✍️</label>
-            <textarea rows="3" placeholder="No onions, extra cheese..."></textarea>
-
-            <button>Order Now</button>
-        </div>
-
-        <!-- FOOD CARD -->
-        <div class="card">
-            <h3>Chicken Pizza 🍕</h3>
-            <div class="price">Price: $8.00</div>
-
-            <label>Quantity</label>
-            <input type="number" min="1" value="1">
-
-            <label>Spice Level 🌶️</label>
-            <select>
-                <option>Low</option>
-                <option>Medium</option>
-                <option>Hot</option>
-            </select>
-
-            <label>Salt Level 🧂</label>
-            <select>
-                <option>Low</option>
-                <option>Normal</option>
-                <option>Extra</option>
-            </select>
-
-            <label>Extra Notes ✍️</label>
-            <textarea rows="3" placeholder="Extra cheese, thin crust..."></textarea>
-
-            <button>Order Now</button>
-        </div>
-
+            <textarea name="notes" rows="3" placeholder="No onions, extra cheese..."></textarea>
+            <button type="submit">Add to Cart 🍽️</button>
+        </form>
     </div>
 
-    <div class="logout">
-        <a href="/accounts/logout/">🚪 Logout</a>
+    <!-- Repeat for other food items -->
+    <div class="card">
+        <h3>🍕 Margherita Pizza</h3>
+        <form method="post" action="{% url 'add_to_cart' %}">
+            {% csrf_token %}
+            <input type="hidden" name="food_item" value="Margherita Pizza">
+            <label>Quantity</label><input type="number" name="quantity" min="1" value="1">
+            <label>Spice Level 🌶️</label><select name="spice_level"><option>Low</option><option>Medium</option><option>Hot</option></select>
+            <label>Salt Level 🧂</label><select name="salt_level"><option>Low</option><option>Normal</option><option>Extra</option></select>
+            <label>Extra Notes ✍️</label><textarea name="notes" rows="3" placeholder="Gluten-free crust, extra cheese..."></textarea>
+            <button type="submit">Add to Cart 🍽️</button>
+        </form>
     </div>
+
+    <div class="card">
+        <h3>🥗 Caesar Salad</h3>
+        <form method="post" action="{% url 'add_to_cart' %}">
+            {% csrf_token %}
+            <input type="hidden" name="food_item" value="Caesar Salad">
+            <label>Quantity</label><input type="number" name="quantity" min="1" value="1">
+            <label>Spice Level 🌶️</label><select name="spice_level"><option>Low</option><option>Medium</option><option>Hot</option></select>
+            <label>Salt Level 🧂</label><select name="salt_level"><option>Low</option><option>Normal</option><option>Extra</option></select>
+            <label>Extra Notes ✍️</label><textarea name="notes" rows="3" placeholder="No croutons, add chicken..."></textarea>
+            <button type="submit">Add to Cart 🍽️</button>
+        </form>
+    </div>
+
 </div>
+
+<footer>
+    Created by Team Foody 🍔 2026
+</footer>
 
 </body>
 </html>

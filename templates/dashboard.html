@@ -1,85 +1,106 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
     <title>Foody Dashboard 🍽️</title>
-
     <style>
         body {
             margin: 0;
             font-family: 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(to right, #fff5ec, #ffe3cc);
+            background: #fff7f0;
         }
 
         header {
-            background-color: #ff6a00;
-            padding: 20px;
+            background: linear-gradient(135deg, #ff6600, #ff3300);
             color: white;
+            padding: 25px;
             text-align: center;
             font-size: 28px;
             font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
         .container {
             padding: 30px;
-            max-width: 1100px;
-            margin: auto;
+        }
+
+        .welcome {
+            font-size: 22px;
+            margin-bottom: 25px;
+        }
+
+        .menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
         }
 
         .card {
-            background-color: white;
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            padding: 20px;
+            transition: transform 0.2s;
         }
 
-        h2 {
-            color: #ff6a00;
-            margin-bottom: 20px;
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            color: #ff5500;
+            margin-bottom: 10px;
+        }
+
+        .price {
+            font-weight: bold;
+            margin-bottom: 10px;
         }
 
         label {
-            font-weight: bold;
             display: block;
-            margin-top: 15px;
-        }
-
-        select, input[type=range], input[type=number] {
-            width: 100%;
-            margin-top: 5px;
-        }
-
-        .range-value {
+            margin-top: 10px;
             font-weight: bold;
-            color: #ff6a00;
+        }
+
+        select, input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        textarea {
+            resize: none;
         }
 
         button {
-            margin-top: 25px;
+            margin-top: 15px;
             width: 100%;
-            padding: 15px;
-            background-color: #ff6a00;
+            padding: 12px;
+            background: #ff6600;
             color: white;
-            font-size: 18px;
             border: none;
             border-radius: 10px;
+            font-size: 16px;
             cursor: pointer;
         }
 
         button:hover {
-            background-color: #e55d00;
+            background: #e65500;
         }
 
-        footer {
+        .logout {
+            margin-top: 30px;
             text-align: center;
-            padding: 15px;
-            color: #777;
+        }
+
+        .logout a {
+            color: #ff3300;
+            font-weight: bold;
+            text-decoration: none;
         }
     </style>
 </head>
-
 <body>
 
 <header>
@@ -87,44 +108,74 @@
 </header>
 
 <div class="container">
-
-    <div class="card">
-        <h2>Welcome, Food Lover 👋</h2>
-        <p>Customize your meal exactly how you like it. We cook to YOUR taste 🍳🔥</p>
+    <div class="welcome">
+        Welcome 👋 You are logged in.
     </div>
 
-    <div class="card">
-        <h2>🍽️ Order Your Meal</h2>
+    <div class="menu">
 
-        <label>Choose Food</label>
-        <select>
-            <option>Jollof Rice 🍚</option>
-            <option>Fried Rice 🍛</option>
-            <option>Chicken & Chips 🍗🍟</option>
-            <option>Beef Burger 🍔</option>
-        </select>
+        <!-- FOOD CARD -->
+        <div class="card">
+            <h3>Classic Burger 🍔</h3>
+            <div class="price">Price: $5.00</div>
 
-        <label>Salt Level 🧂:
-            <span class="range-value">Medium</span>
-        </label>
-        <input type="range" min="0" max="3">
+            <label>Quantity</label>
+            <input type="number" min="1" value="1">
 
-        <label>Spice Level 🌶️:
-            <span class="range-value">Hot</span>
-        </label>
-        <input type="range" min="0" max="3">
+            <label>Spice Level 🌶️</label>
+            <select>
+                <option>Low</option>
+                <option>Medium</option>
+                <option>Hot</option>
+            </select>
 
-        <label>Quantity 🍽️</label>
-        <input type="number" min="1" max="10" value="1">
+            <label>Salt Level 🧂</label>
+            <select>
+                <option>Low</option>
+                <option>Normal</option>
+                <option>Extra</option>
+            </select>
 
-        <button>Place Order 🚀</button>
+            <label>Extra Notes ✍️</label>
+            <textarea rows="3" placeholder="No onions, extra cheese..."></textarea>
+
+            <button>Order Now</button>
+        </div>
+
+        <!-- FOOD CARD -->
+        <div class="card">
+            <h3>Chicken Pizza 🍕</h3>
+            <div class="price">Price: $8.00</div>
+
+            <label>Quantity</label>
+            <input type="number" min="1" value="1">
+
+            <label>Spice Level 🌶️</label>
+            <select>
+                <option>Low</option>
+                <option>Medium</option>
+                <option>Hot</option>
+            </select>
+
+            <label>Salt Level 🧂</label>
+            <select>
+                <option>Low</option>
+                <option>Normal</option>
+                <option>Extra</option>
+            </select>
+
+            <label>Extra Notes ✍️</label>
+            <textarea rows="3" placeholder="Extra cheese, thin crust..."></textarea>
+
+            <button>Order Now</button>
+        </div>
+
     </div>
 
+    <div class="logout">
+        <a href="/accounts/logout/">🚪 Logout</a>
+    </div>
 </div>
-
-<footer>
-    © 2026 Foody Restaurant | Built with ❤️ by Team Foody
-</footer>
 
 </body>
 </html>

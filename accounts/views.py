@@ -4,8 +4,7 @@ from django.contrib.auth import login, authenticate
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .models import Order, CartItem  # make sure both are in models.py
-from .models import Order
+from .models import Order, CartItem, MenuItem  # Added MenuItem
 
 
 # -----------------------------
@@ -39,12 +38,12 @@ def signup(request):
 
 
 # -----------------------------
-# DASHBOARD VIEW
+# DASHBOARD VIEW (Dynamic Menu)
 # -----------------------------
 @login_required
 def dashboard(request):
-    # You can later pass cart counts or recommendations here
-    return render(request, 'dashboard.html')
+    menu_items = MenuItem.objects.all()  # Fetch all menu items from database
+    return render(request, 'dashboard.html', {'menu_items': menu_items})
 
 
 # -----------------------------
@@ -121,6 +120,10 @@ def checkout(request):
         messages.info(request, "Your cart is empty!")
     return redirect('dashboard')
 
+
+# -----------------------------
+# ORDER HISTORY
+# -----------------------------
 @login_required
 def order_history(request):
     # Get all orders for the logged-in user

@@ -81,7 +81,7 @@ class MenuItem(models.Model):
     salt_level_choices = [('Low', 'Low'), ('Normal', 'Normal'), ('Extra', 'Extra')]
     default_spice = models.CharField(max_length=10, choices=spice_level_choices, default='Medium')
     default_salt = models.CharField(max_length=10, choices=salt_level_choices, default='Normal')
-    image_url = models.URLField(blank=True, null=True)  # optional image for menu
+    image = models.ImageField(upload_to='menu_images/', blank=True, null=True)  # local images
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

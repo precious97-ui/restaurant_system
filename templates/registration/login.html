@@ -27,9 +27,16 @@
         input[type=text], input[type=password] {
             width: 100%;
             padding: 10px;
-            margin: 5px 0 15px 0;
+            margin: 5px 0 10px 0;
             border: 1px solid #ccc;
             border-radius: 5px;
+        }
+        .show-password {
+            font-size: 14px;
+            cursor: pointer;
+            color: #ff6600;
+            text-align: right;
+            margin-bottom: 10px;
         }
         button {
             width: 100%;
@@ -70,14 +77,42 @@
             <div class="error">❌ Invalid username or password</div>
         {% endif %}
 
-        <!-- username and password fields with proper names -->
+        <!-- username and password fields -->
         <label>Username</label>
         <input type="text" name="username" placeholder="Enter username" required>
+
         <label>Password</label>
-        <input type="password" name="password" placeholder="Enter password" required>
+        <input type="password" id="password" name="password" placeholder="Enter password" required>
+
+        <!-- Show/Hide Password -->
+        <div class="show-password" onclick="togglePassword()">
+            👁️ Show Password
+        </div>
 
         <button type="submit">Login</button>
+
+        <!-- Forgot password link -->
+        <p>
+            <a href="{% url 'password_reset' %}">Forgot your password? 🔐</a>
+        </p>
+
         <p>Don't have an account? <a href="{% url 'signup' %}">Sign up 🌯</a></p>
     </form>
+
+    <!-- JavaScript -->
+    <script>
+        function togglePassword() {
+            const passwordField = document.getElementById("password");
+            const toggleText = document.querySelector(".show-password");
+
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+                toggleText.innerHTML = "🙈 Hide Password";
+            } else {
+                passwordField.type = "password";
+                toggleText.innerHTML = "👁️ Show Password";
+            }
+        }
+    </script>
 </body>
 </html>

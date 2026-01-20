@@ -27,9 +27,16 @@
         input[type=text], input[type=password] {
             width: 100%;
             padding: 10px;
-            margin: 5px 0 15px 0;
+            margin: 5px 0 10px 0;
             border: 1px solid #ccc;
             border-radius: 5px;
+        }
+        .show-password {
+            cursor: pointer;
+            font-size: 14px;
+            color: #ff6600;
+            margin-bottom: 10px;
+            user-select: none;
         }
         button {
             width: 100%;
@@ -85,13 +92,32 @@
         <!-- input fields -->
         <label>Username</label>
         <input type="text" name="username" placeholder="Enter username" required>
+
         <label>Password</label>
-        <input type="password" name="password1" placeholder="Enter password" required>
+        <input type="password" id="password1" name="password1" placeholder="Enter password" required>
+        <div class="show-password" onclick="togglePassword('password1')">👁️ Show Password</div>
+
         <label>Confirm Password</label>
-        <input type="password" name="password2" placeholder="Confirm password" required>
+        <input type="password" id="password2" name="password2" placeholder="Confirm password" required>
+        <div class="show-password" onclick="togglePassword('password2')">👁️ Show Password</div>
 
         <button type="submit">Sign Up</button>
         <p>Already have an account? <a href="{% url 'login' %}">Login 🌯</a></p>
     </form>
+
+    <script>
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const toggleDiv = field.nextElementSibling;
+
+            if (field.type === "password") {
+                field.type = "text";
+                toggleDiv.innerHTML = "🙈 Hide Password";
+            } else {
+                field.type = "password";
+                toggleDiv.innerHTML = "👁️ Show Password";
+            }
+        }
+    </script>
 </body>
 </html>

@@ -7,6 +7,20 @@ from django.contrib.auth.decorators import login_required
 from .models import Order, CartItem, MenuItem, Profile, TeamMember
 from .forms import CustomUserCreationForm, CustomAuthenticationForm
 
+# -----------------------------
+# XAF Conversion Rate
+# -----------------------------
+XAF_RATE = 600  # Example: 1 USD = 600 XAF, adjust as needed
+
+# -----------------------------
+# DASHBOARD CATEGORIES
+# -----------------------------
+CATEGORIES = {
+    'appetizer': 'Appetizers',
+    'main': 'Main Dishes',
+    'dessert': 'Desserts',
+    'drink': 'Drinks'
+}
 
 # -----------------------------
 # SIGNUP VIEW
@@ -33,7 +47,6 @@ def signup(request):
         form = CustomUserCreationForm()
 
     return render(request, 'registration/signup.html', {'form': form})
-
 
 # -----------------------------
 # LOGIN VIEW
@@ -72,15 +85,33 @@ def custom_login(request):
 
     return render(request, 'registration/login.html', {'form': form})
 
-
 # -----------------------------
 # DASHBOARD VIEW
 # -----------------------------
 @login_required
 def dashboard(request):
     menu_items = MenuItem.objects.all()
-    return render(request, 'dashboard.html', {'menu_items': menu_items})
+    search_query = request.GET.get('search', '').strip()
+    selected_category = request.GET.get('category', '')
 
+    # Filter by search
+    if search_query:
+        menu_items = menu_items.filter(name__icontains=search_query)
+
+    # Filter by category if you add a 'category' field in MenuItem
+    if selected_category:
+        menu_items = menu_items.filter(category__iexact=selected_category)
+
+    # Convert price to XAF
+    for item in menu_items:
+        item.price_xaf = item.price * XAF_RATE
+
+    return render(request, 'dashboard.html', {
+        'menu_items': menu_items,
+        'search_query': search_query,
+        'categories': CATEGORIES.items(),
+        'selected_category': selected_category
+    })
 
 # -----------------------------
 # ADD TO CART
@@ -108,15 +139,16 @@ def place_order(request):
 
     return redirect('dashboard')
 
-
 # -----------------------------
 # VIEW CART
 # -----------------------------
 @login_required
 def cart(request):
     items = CartItem.objects.filter(user=request.user, ordered=False)
-    return render(request, 'cart.html', {'cart_items': items})
-
+    total = sum(item.quantity * item.food_item_price if hasattr(item, 'food_item_price') else 0 for item in items)
+    # If you want XAF total, multiply by XAF_RATE here
+    total_xaf = total * XAF_RATE
+    return render(request, 'cart.html', {'cart_items': items, 'total_xaf': total_xaf})
 
 # -----------------------------
 # REMOVE FROM CART
@@ -131,7 +163,6 @@ def remove_from_cart(request, item_id):
         messages.error(request, "Item not found.")
 
     return redirect('cart')
-
 
 # -----------------------------
 # CHECKOUT
@@ -161,7 +192,6 @@ def checkout(request):
 
     return redirect('dashboard')
 
-
 # -----------------------------
 # ORDER HISTORY
 # -----------------------------
@@ -170,12 +200,10 @@ def order_history(request):
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'order_history.html', {'orders': orders})
 
-
 # -----------------------------
-# ABOUT PAGE VIEW (NEW)
+# ABOUT PAGE VIEW
 # -----------------------------
 @login_required
 def about(request):
-    # Fetch all team members
-    team_members = TeamMember.objects.all()  # 5 members you can add in admin
+    team_members = TeamMember.objects.all()
     return render(request, 'about.html', {'team_members': team_members})

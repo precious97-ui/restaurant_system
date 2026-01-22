@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 
-from .models import Order, CartItem, MenuItem, Profile
+from .models import Order, CartItem, MenuItem, Profile, TeamMember
 from .forms import CustomUserCreationForm, CustomAuthenticationForm
 
 
@@ -26,7 +26,6 @@ def signup(request):
             messages.success(request, f"🎉 Welcome, {user.username}! Your account has been created.")
             return redirect('dashboard')
         else:
-            # Show form validation errors
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(request, f"{field.capitalize()}: {error}")
@@ -61,18 +60,13 @@ def custom_login(request):
             if user is None:
                 profile = Profile.objects.filter(phone_number=identifier).first()
                 if profile:
-                    user = authenticate(
-                        request,
-                        username=profile.user.username,
-                        password=password
-                    )
+                    user = authenticate(request, username=profile.user.username, password=password)
 
             if user:
                 login(request, user)
                 return redirect('dashboard')
             else:
                 messages.error(request, "❌ Invalid username, email, or phone number")
-
     else:
         form = CustomAuthenticationForm()
 
@@ -175,3 +169,13 @@ def checkout(request):
 def order_history(request):
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'order_history.html', {'orders': orders})
+
+
+# -----------------------------
+# ABOUT PAGE VIEW (NEW)
+# -----------------------------
+@login_required
+def about(request):
+    # Fetch all team members
+    team_members = TeamMember.objects.all()  # 5 members you can add in admin
+    return render(request, 'about.html', {'team_members': team_members})

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Order, CartItem, MenuItem  # Added MenuItem
+from .models import Order, CartItem, MenuItem, Profile, TeamMember  # Added Profile and TeamMember
 
 
 # -----------------------------
@@ -50,3 +50,21 @@ class MenuItemAdmin(admin.ModelAdmin):
     )
     list_filter = ('default_spice', 'default_salt', 'created_at')
     search_fields = ('name', 'description')
+
+
+# -----------------------------
+# PROFILE ADMIN
+# -----------------------------
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'phone_number', 'email_verified')
+    search_fields = ('user__username', 'phone_number')
+
+
+# -----------------------------
+# TEAM MEMBER ADMIN
+# -----------------------------
+@admin.register(TeamMember)
+class TeamMemberAdmin(admin.ModelAdmin):
+    list_display = ('name', 'role')
+    search_fields = ('name', 'role')

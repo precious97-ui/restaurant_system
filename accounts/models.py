@@ -98,3 +98,16 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.user.username
+
+
+# -----------------------------
+# TEAM MEMBER MODEL (NEW)
+# -----------------------------
+class TeamMember(models.Model):
+    name = models.CharField(max_length=100)
+    role = models.CharField(max_length=100)
+    photo = models.ImageField(upload_to='team_photos/')  # store photos in MEDIA_ROOT/team_photos/
+    bio = models.TextField(blank=True, null=True)  # optional short bio
+
+    def __str__(self):
+        return f"{self.name} - {self.role}"

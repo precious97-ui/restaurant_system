@@ -48,13 +48,10 @@
     <a href="{% url 'dashboard' %}" class="dashboard-btn">🏠 Dashboard</a>
 </header>
 
-<!-- Django messages -->
 <div class="messages">
     {% if messages %}
         {% for message in messages %}
-            <div class="{% if message.tags %}{{ message.tags }}{% endif %}">
-                {{ message }}
-            </div>
+            <div class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</div>
         {% endfor %}
     {% endif %}
 </div>
@@ -68,6 +65,7 @@
                     <h3>{{ item.food_item }} x{{ item.quantity }}</h3>
                     <p>Spice: {{ item.spice_level }}, Salt: {{ item.salt_level }}</p>
                     {% if item.notes %}<p>Notes: {{ item.notes }}</p>{% endif %}
+                    <p><strong>Total: {{ item.total_price_xaf|floatformat:0 }} XAF</strong></p>
                 </div>
                 <div>
                     <form method="post" action="{% url 'remove_from_cart' item.id %}">
@@ -78,7 +76,8 @@
             </div>
         {% endfor %}
 
-        <!-- Checkout button -->
+        <h3 style="text-align:right; margin-top:20px;">Grand Total: {{ grand_total|floatformat:0 }} XAF</h3>
+
         <form method="post" action="{% url 'checkout' %}">
             {% csrf_token %}
             <button type="submit" class="checkout-btn">🎉 Checkout All Items</button>

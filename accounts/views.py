@@ -7,8 +7,20 @@ from django.contrib.auth.decorators import login_required
 from .models import Order, CartItem, MenuItem, Profile, TeamMember
 from .forms import CustomUserCreationForm, CustomAuthenticationForm
 
-# Conversion rate USD -> XAF
-XAF_RATE = 600  # adjust according to your needs
+# -----------------------------
+# XAF Conversion Rate
+# -----------------------------
+XAF_RATE = 600  # Example: 1 USD = 600 XAF, adjust as needed
+
+# -----------------------------
+# DASHBOARD CATEGORIES
+# -----------------------------
+CATEGORIES = {
+    'appetizer': 'Appetizers',
+    'main': 'Main Dishes',
+    'dessert': 'Desserts',
+    'drink': 'Drinks'
+}
 
 # -----------------------------
 # SIGNUP VIEW
@@ -18,9 +30,12 @@ def signup(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
+
+            # Create profile with phone number if provided
             phone = form.cleaned_data.get('phone_number')
             if phone:
                 Profile.objects.create(user=user, phone_number=phone)
+
             login(request, user)
             messages.success(request, f"🎉 Welcome, {user.username}! Your account has been created.")
             return redirect('dashboard')
@@ -30,8 +45,8 @@ def signup(request):
                     messages.error(request, f"{field.capitalize()}: {error}")
     else:
         form = CustomUserCreationForm()
-    return render(request, 'registration/signup.html', {'form': form})
 
+    return render(request, 'registration/signup.html', {'form': form})
 
 # -----------------------------
 # LOGIN VIEW
@@ -42,6 +57,7 @@ def custom_login(request):
         if form.is_valid():
             identifier = form.cleaned_data['identifier'].strip()
             password = form.cleaned_data['password']
+
             user = None
 
             # Try username
@@ -66,8 +82,8 @@ def custom_login(request):
                 messages.error(request, "❌ Invalid username, email, or phone number")
     else:
         form = CustomAuthenticationForm()
-    return render(request, 'registration/login.html', {'form': form})
 
+    return render(request, 'registration/login.html', {'form': form})
 
 # -----------------------------
 # DASHBOARD VIEW
@@ -75,10 +91,27 @@ def custom_login(request):
 @login_required
 def dashboard(request):
     menu_items = MenuItem.objects.all()
+    search_query = request.GET.get('search', '').strip()
+    selected_category = request.GET.get('category', '')
+
+    # Filter by search
+    if search_query:
+        menu_items = menu_items.filter(name__icontains=search_query)
+
+    # Filter by category if you add a 'category' field in MenuItem
+    if selected_category:
+        menu_items = menu_items.filter(category__iexact=selected_category)
+
+    # Convert price to XAF
     for item in menu_items:
         item.price_xaf = item.price * XAF_RATE
-    return render(request, 'dashboard.html', {'menu_items': menu_items})
 
+    return render(request, 'dashboard.html', {
+        'menu_items': menu_items,
+        'search_query': search_query,
+        'categories': CATEGORIES.items(),
+        'selected_category': selected_category
+    })
 
 # -----------------------------
 # ADD TO CART
@@ -106,27 +139,16 @@ def place_order(request):
 
     return redirect('dashboard')
 
-
 # -----------------------------
-# VIEW CART (with XAF totals)
+# VIEW CART
 # -----------------------------
 @login_required
 def cart(request):
     items = CartItem.objects.filter(user=request.user, ordered=False)
-    grand_total = 0
-
-    for item in items:
-        menu_item = MenuItem.objects.filter(name=item.food_item).first()
-        if menu_item:
-            item.price_xaf = menu_item.price * XAF_RATE
-            item.total_price_xaf = item.price_xaf * item.quantity
-            grand_total += item.total_price_xaf
-
-    return render(request, 'cart.html', {
-        'cart_items': items,
-        'grand_total': grand_total
-    })
-
+    total = sum(item.quantity * item.food_item_price if hasattr(item, 'food_item_price') else 0 for item in items)
+    # If you want XAF total, multiply by XAF_RATE here
+    total_xaf = total * XAF_RATE
+    return render(request, 'cart.html', {'cart_items': items, 'total_xaf': total_xaf})
 
 # -----------------------------
 # REMOVE FROM CART
@@ -139,8 +161,8 @@ def remove_from_cart(request, item_id):
         messages.success(request, "❌ Item removed from cart.")
     except CartItem.DoesNotExist:
         messages.error(request, "Item not found.")
-    return redirect('cart')
 
+    return redirect('cart')
 
 # -----------------------------
 # CHECKOUT
@@ -170,7 +192,6 @@ def checkout(request):
 
     return redirect('dashboard')
 
-
 # -----------------------------
 # ORDER HISTORY
 # -----------------------------
@@ -178,7 +199,6 @@ def checkout(request):
 def order_history(request):
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'order_history.html', {'orders': orders})
-
 
 # -----------------------------
 # ABOUT PAGE VIEW

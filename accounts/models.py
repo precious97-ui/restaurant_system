@@ -74,9 +74,17 @@ class CartItem(models.Model):
 # MENU ITEM MODEL
 # -----------------------------
 class MenuItem(models.Model):
+    CATEGORY_CHOICES = [
+        ('appetizer', 'Appetizer'),
+        ('main', 'Main Dish'),
+        ('dessert', 'Dessert'),
+        ('drink', 'Drink'),
+    ]
+
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
     price = models.DecimalField(max_digits=6, decimal_places=2)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, blank=True, null=True)
     spice_level_choices = [('Low', 'Low'), ('Medium', 'Medium'), ('Hot', 'Hot')]
     salt_level_choices = [('Low', 'Low'), ('Normal', 'Normal'), ('Extra', 'Extra')]
     default_spice = models.CharField(max_length=10, choices=spice_level_choices, default='Medium')
@@ -89,7 +97,7 @@ class MenuItem(models.Model):
 
 
 # -----------------------------
-# PROFILE MODEL (Added)
+# PROFILE MODEL
 # -----------------------------
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -101,7 +109,7 @@ class Profile(models.Model):
 
 
 # -----------------------------
-# TEAM MEMBER MODEL (NEW)
+# TEAM MEMBER MODEL
 # -----------------------------
 class TeamMember(models.Model):
     name = models.CharField(max_length=100)

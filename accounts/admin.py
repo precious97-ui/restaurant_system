@@ -1,6 +1,5 @@
 from django.contrib import admin
-from .models import Order, CartItem, MenuItem, Profile, TeamMember  # Added Profile and TeamMember
-
+from .models import Order, CartItem, MenuItem, Profile, TeamMember
 
 # -----------------------------
 # ORDER ADMIN
@@ -12,9 +11,10 @@ class OrderAdmin(admin.ModelAdmin):
         'user',
         'food_item',
         'quantity',
+        'status',
         'created_at'
     )
-    list_filter = ('created_at',)
+    list_filter = ('status', 'created_at')
     search_fields = ('user__username', 'food_item')
 
 
@@ -28,10 +28,12 @@ class CartItemAdmin(admin.ModelAdmin):
         'user',
         'food_item',
         'quantity',
+        'spice_level',
+        'salt_level',
         'ordered',
         'added_at'
     )
-    list_filter = ('ordered',)
+    list_filter = ('ordered', 'spice_level', 'salt_level')
     search_fields = ('user__username', 'food_item')
 
 
@@ -43,13 +45,20 @@ class MenuItemAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'name',
+        'category',
         'price',
         'default_spice',
         'default_salt',
         'created_at'
     )
-    list_filter = ('default_spice', 'default_salt', 'created_at')
+    list_filter = ('category', 'default_spice', 'default_salt', 'created_at')
     search_fields = ('name', 'description')
+    # Use dropdown for category in the admin form
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'description', 'category', 'price', 'default_spice', 'default_salt', 'image')
+        }),
+    )
 
 
 # -----------------------------

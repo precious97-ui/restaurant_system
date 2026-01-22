@@ -13,7 +13,7 @@
             height: 100vh;
         }
         form {
-            background-color: rgba(255,255,255,0.95);
+            background-color: rgba(243, 239, 239, 0.95);
             padding: 30px;
             border-radius: 15px;
             width: 350px;
@@ -27,9 +27,16 @@
         input[type=text], input[type=password] {
             width: 100%;
             padding: 10px;
-            margin: 5px 0 15px 0;
+            margin: 5px 0 10px 0;
             border: 1px solid #ccc;
             border-radius: 5px;
+        }
+        .show-password {
+            cursor: pointer;
+            font-size: 14px;
+            color: #ff6600;
+            margin-bottom: 10px;
+            user-select: none;
         }
         button {
             width: 100%;
@@ -61,23 +68,43 @@
     </style>
 </head>
 <body>
-    <form method="post" action="{% url 'login' %}">
+    <form method="post" action="{% url 'custom_login' %}">
         {% csrf_token %}
         <h2>Login 🍕</h2>
 
         <!-- show form errors -->
-        {% if form.errors %}
-            <div class="error">❌ Invalid username or password</div>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="error">{{ message }}</div>
+            {% endfor %}
         {% endif %}
 
-        <!-- username and password fields with proper names -->
-        <label>Username</label>
-        <input type="text" name="username" placeholder="Enter username" required>
+        <!-- identifier field: username/email/phone -->
+        <label>Username / Email / Phone</label>
+        <input type="text" name="identifier" placeholder="Enter username, email, or phone" required>
+
         <label>Password</label>
-        <input type="password" name="password" placeholder="Enter password" required>
+        <input type="password" id="password" name="password" placeholder="Enter password" required>
+        <div class="show-password" onclick="togglePassword('password')">👁️ Show Password</div>
 
         <button type="submit">Login</button>
         <p>Don't have an account? <a href="{% url 'signup' %}">Sign up 🌯</a></p>
+        <p><a href="{% url 'password_reset' %}">Forgot Password?</a></p>
     </form>
+
+    <script>
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const toggleDiv = field.nextElementSibling;
+
+            if (field.type === "password") {
+                field.type = "text";
+                toggleDiv.innerHTML = "🙈 Hide Password";
+            } else {
+                field.type = "password";
+                toggleDiv.innerHTML = "👁️ Show Password";
+            }
+        }
+    </script>
 </body>
 </html>

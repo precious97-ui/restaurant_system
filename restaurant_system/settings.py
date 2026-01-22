@@ -94,3 +94,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # folder where uploaded images are
 # Auth redirects
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
+
+
+
+# ==========================
+# EMAIL CONFIG (DEV MODE)
+# ==========================
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'foody@localhost'

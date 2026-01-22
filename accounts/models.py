@@ -86,3 +86,15 @@ class MenuItem(models.Model):
 
     def __str__(self):
         return self.name
+
+
+# -----------------------------
+# PROFILE MODEL (Added)
+# -----------------------------
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    email_verified = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.user.username

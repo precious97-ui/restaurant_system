@@ -1,24 +1,33 @@
-"""
-URL configuration for restaurant_system project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.0/topics/http/urls/
-"""
 from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import redirect
 from django.conf import settings
 from django.conf.urls.static import static
 from accounts import views
+from django.contrib.auth import views as auth_views
 
 # Redirect default homepage to login
 def home(request):
-    return redirect('login')  # use Django auth login URL name
+    return redirect('custom_login')  # now points to our custom login view
 
 urlpatterns = [
-    path('', home),  # default redirects to login
+    path('', home),  # default redirects to custom login
     path('admin/', admin.site.urls),
-    path('accounts/', include('django.contrib.auth.urls')),  # login/logout
+    
+    # Password reset URLs
+    path('accounts/password-reset/',
+         auth_views.PasswordResetView.as_view(template_name='registration/password_reset_form.html'),
+         name='password_reset'),
+    path('accounts/password-reset/done/',
+         auth_views.PasswordResetDoneView.as_view(template_name='registration/password_reset_done.html'),
+         name='password_reset_done'),
+    path('accounts/reset/<uidb64>/<token>/',
+         auth_views.PasswordResetConfirmView.as_view(template_name='registration/password_reset_confirm.html'),
+         name='password_reset_confirm'),
+    path('accounts/reset/done/',
+         auth_views.PasswordResetCompleteView.as_view(template_name='registration/password_reset_complete.html'),
+         name='password_reset_complete'),
+
     path('accounts/', include('accounts.urls')),  # custom signup, add-to-cart, etc.
     path('dashboard/', views.dashboard, name='dashboard'),
 ]

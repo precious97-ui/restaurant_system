@@ -24,7 +24,7 @@
             color: #ff6600;
             margin-bottom: 20px;
         }
-        input[type=text], input[type=password] {
+        input {
             width: 100%;
             padding: 10px;
             margin: 5px 0 10px 0;
@@ -78,7 +78,7 @@
         {% csrf_token %}
         <h2>Sign Up 🍕</h2>
 
-        <!-- show messages -->
+        <!-- Show messages -->
         {% if messages %}
             {% for message in messages %}
                 {% if message.tags == 'error' %}
@@ -89,27 +89,31 @@
             {% endfor %}
         {% endif %}
 
-        <!-- input fields -->
-        <label>Username</label>
-        <input type="text" name="username" placeholder="Enter username" required>
+        <!-- Render form fields dynamically -->
+        {% for field in form %}
+            <label>{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}
+                <small>{{ field.help_text }}</small>
+            {% endif %}
+            {% for error in field.errors %}
+                <div class="error">❌ {{ error }}</div>
+            {% endfor %}
 
-        <label>Password</label>
-        <input type="password" id="password1" name="password1" placeholder="Enter password" required>
-        <div class="show-password" onclick="togglePassword('password1')">👁️ Show Password</div>
-
-        <label>Confirm Password</label>
-        <input type="password" id="password2" name="password2" placeholder="Confirm password" required>
-        <div class="show-password" onclick="togglePassword('password2')">👁️ Show Password</div>
+            <!-- Add show/hide password toggle for password fields -->
+            {% if field.name == "password1" or field.name == "password2" %}
+                <div class="show-password" onclick="togglePassword('{{ field.id_for_label }}')">👁️ Show Password</div>
+            {% endif %}
+        {% endfor %}
 
         <button type="submit">Sign Up</button>
-        <p>Already have an account? <a href="{% url 'login' %}">Login 🌯</a></p>
+        <p>Already have an account? <a href="{% url 'custom_login' %}">Login 🌯</a></p>
     </form>
 
     <script>
         function togglePassword(fieldId) {
             const field = document.getElementById(fieldId);
             const toggleDiv = field.nextElementSibling;
-
             if (field.type === "password") {
                 field.type = "text";
                 toggleDiv.innerHTML = "🙈 Hide Password";

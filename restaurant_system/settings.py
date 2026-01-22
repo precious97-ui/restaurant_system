@@ -95,6 +95,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # folder where uploaded images are
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
+
+
 # ==========================
 # EMAIL CONFIG (DEV MODE)
 # ==========================

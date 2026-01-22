@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .models import Order, CartItem, MenuItem  # Added MenuItem
+
+from .models import Order, CartItem, MenuItem, Profile
+from .forms import CustomUserCreationForm, CustomAuthenticationForm
 
 
 # -----------------------------
@@ -12,42 +13,83 @@ from .models import Order, CartItem, MenuItem  # Added MenuItem
 # -----------------------------
 def signup(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        username = request.POST.get('username')
-
-        # Check if username already exists
-        if User.objects.filter(username=username).exists():
-            messages.error(request, f"❌ Username '{username}' is already taken.")
-            return render(request, 'registration/signup.html', {'form': form})
-
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)  # auto-login after signup
-            messages.success(request, f"🎉 Welcome, {username}! Your account has been created.")
+
+            # Create profile with phone number if provided
+            phone = form.cleaned_data.get('phone_number')
+            if phone:
+                Profile.objects.create(user=user, phone_number=phone)
+
+            login(request, user)
+            messages.success(request, f"🎉 Welcome, {user.username}! Your account has been created.")
             return redirect('dashboard')
         else:
             # Show form validation errors
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(request, f"{field.capitalize()}: {error}")
-
     else:
-        form = UserCreationForm()
+        form = CustomUserCreationForm()
 
     return render(request, 'registration/signup.html', {'form': form})
 
 
 # -----------------------------
-# DASHBOARD VIEW (Dynamic Menu)
+# LOGIN VIEW
+# -----------------------------
+def custom_login(request):
+    if request.method == 'POST':
+        form = CustomAuthenticationForm(request.POST)
+        if form.is_valid():
+            identifier = form.cleaned_data['identifier'].strip()
+            password = form.cleaned_data['password']
+
+            user = None
+
+            # Try username
+            user = authenticate(request, username=identifier, password=password)
+
+            # Try email
+            if user is None:
+                user_obj = User.objects.filter(email__iexact=identifier).first()
+                if user_obj:
+                    user = authenticate(request, username=user_obj.username, password=password)
+
+            # Try phone number
+            if user is None:
+                profile = Profile.objects.filter(phone_number=identifier).first()
+                if profile:
+                    user = authenticate(
+                        request,
+                        username=profile.user.username,
+                        password=password
+                    )
+
+            if user:
+                login(request, user)
+                return redirect('dashboard')
+            else:
+                messages.error(request, "❌ Invalid username, email, or phone number")
+
+    else:
+        form = CustomAuthenticationForm()
+
+    return render(request, 'registration/login.html', {'form': form})
+
+
+# -----------------------------
+# DASHBOARD VIEW
 # -----------------------------
 @login_required
 def dashboard(request):
-    menu_items = MenuItem.objects.all()  # Fetch all menu items from database
+    menu_items = MenuItem.objects.all()
     return render(request, 'dashboard.html', {'menu_items': menu_items})
 
 
 # -----------------------------
-# PLACE ORDER (Add to Cart)
+# ADD TO CART
 # -----------------------------
 @login_required
 def place_order(request):
@@ -58,7 +100,6 @@ def place_order(request):
         salt_level = request.POST.get('salt_level')
         notes = request.POST.get('notes')
 
-        # Save to CartItem
         CartItem.objects.create(
             user=request.user,
             food_item=food_item,
@@ -70,6 +111,7 @@ def place_order(request):
         )
 
         messages.success(request, f"✅ '{food_item}' has been added to your cart!")
+
     return redirect('dashboard')
 
 
@@ -93,6 +135,7 @@ def remove_from_cart(request, item_id):
         messages.success(request, "❌ Item removed from cart.")
     except CartItem.DoesNotExist:
         messages.error(request, "Item not found.")
+
     return redirect('cart')
 
 
@@ -102,11 +145,13 @@ def remove_from_cart(request, item_id):
 @login_required
 def checkout(request):
     items = CartItem.objects.filter(user=request.user, ordered=False)
+
     if items.exists():
         for item in items:
             item.ordered = True
             item.save()
-            # Optional: save to Orders for history
+
+            # Save to order history
             Order.objects.create(
                 user=item.user,
                 food_item=item.food_item,
@@ -115,9 +160,11 @@ def checkout(request):
                 salt_level=item.salt_level,
                 notes=item.notes
             )
+
         messages.success(request, "🎉 Your order has been placed successfully!")
     else:
         messages.info(request, "Your cart is empty!")
+
     return redirect('dashboard')
 
 
@@ -126,6 +173,5 @@ def checkout(request):
 # -----------------------------
 @login_required
 def order_history(request):
-    # Get all orders for the logged-in user
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'order_history.html', {'orders': orders})

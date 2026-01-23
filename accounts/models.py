@@ -24,20 +24,16 @@ class Order(models.Model):
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    food_item = models.CharField(max_length=100)
+    menu_item = models.ForeignKey('MenuItem', on_delete=models.CASCADE, null=True, blank=True)
     quantity = models.PositiveIntegerField(default=1)
     spice_level = models.CharField(max_length=10, choices=SPICE_CHOICES)
     salt_level = models.CharField(max_length=10, choices=SALT_CHOICES)
     notes = models.TextField(blank=True, null=True)
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default='pending'
-    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.food_item} ({self.status})"
+        return f"{self.user.username} - {self.menu_item.name if self.menu_item else 'Unknown'} ({self.status})"
 
 
 # -----------------------------
@@ -57,7 +53,7 @@ class CartItem(models.Model):
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    food_item = models.CharField(max_length=100)
+    menu_item = models.ForeignKey('MenuItem', on_delete=models.CASCADE, null=True, blank=True)
     quantity = models.PositiveIntegerField(default=1)
     spice_level = models.CharField(max_length=10, choices=SPICE_CHOICES)
     salt_level = models.CharField(max_length=10, choices=SALT_CHOICES)
@@ -67,7 +63,7 @@ class CartItem(models.Model):
 
     def __str__(self):
         status = "Ordered" if self.ordered else "In Cart"
-        return f"{self.user.username} - {self.food_item} x{self.quantity} ({status})"
+        return f"{self.user.username} - {self.menu_item.name if self.menu_item else 'Unknown'} x{self.quantity} ({status})"
 
 
 # -----------------------------
@@ -89,7 +85,7 @@ class MenuItem(models.Model):
     salt_level_choices = [('Low', 'Low'), ('Normal', 'Normal'), ('Extra', 'Extra')]
     default_spice = models.CharField(max_length=10, choices=spice_level_choices, default='Medium')
     default_salt = models.CharField(max_length=10, choices=salt_level_choices, default='Normal')
-    image = models.ImageField(upload_to='menu_images/', blank=True, null=True)  # local images
+    image = models.ImageField(upload_to='menu_images/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -114,8 +110,8 @@ class Profile(models.Model):
 class TeamMember(models.Model):
     name = models.CharField(max_length=100)
     role = models.CharField(max_length=100)
-    photo = models.ImageField(upload_to='team_photos/')  # store photos in MEDIA_ROOT/team_photos/
-    bio = models.TextField(blank=True, null=True)  # optional short bio
+    photo = models.ImageField(upload_to='team_photos/')
+    bio = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.name} - {self.role}"

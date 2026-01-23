@@ -34,7 +34,13 @@
         <tbody>
             {% for order in orders %}
             <tr>
-                <td>{{ order.food_item }}</td>
+                <td>
+                    {% if order.menu_item %}
+                        {{ order.menu_item.name }}
+                    {% else %}
+                        Unknown
+                    {% endif %}
+                </td>
                 <td>{{ order.quantity }}</td>
                 <td>{{ order.spice_level }}</td>
                 <td>{{ order.salt_level }}</td>

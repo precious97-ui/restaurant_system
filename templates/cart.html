@@ -65,6 +65,7 @@
                     <h3>{{ item.food_item }} x{{ item.quantity }}</h3>
                     <p>Spice: {{ item.spice_level }}, Salt: {{ item.salt_level }}</p>
                     {% if item.notes %}<p>Notes: {{ item.notes }}</p>{% endif %}
+                    <p>Price per item: {{ item.price_xaf|floatformat:0 }} XAF</p>
                     <p><strong>Total: {{ item.total_price_xaf|floatformat:0 }} XAF</strong></p>
                 </div>
                 <div>

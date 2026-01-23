@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -10,7 +10,7 @@ from .forms import CustomUserCreationForm, CustomAuthenticationForm
 # -----------------------------
 # XAF Conversion Rate
 # -----------------------------
-XAF_RATE = 600  # Example: 1 USD = 600 XAF, adjust as needed
+XAF_RATE = 600  # 1 USD = 600 XAF
 
 # -----------------------------
 # DASHBOARD CATEGORIES
@@ -30,12 +30,9 @@ def signup(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-
-            # Create profile with phone number if provided
             phone = form.cleaned_data.get('phone_number')
             if phone:
                 Profile.objects.create(user=user, phone_number=phone)
-
             login(request, user)
             messages.success(request, f"🎉 Welcome, {user.username}! Your account has been created.")
             return redirect('dashboard')
@@ -45,7 +42,6 @@ def signup(request):
                     messages.error(request, f"{field.capitalize()}: {error}")
     else:
         form = CustomUserCreationForm()
-
     return render(request, 'registration/signup.html', {'form': form})
 
 # -----------------------------
@@ -57,24 +53,15 @@ def custom_login(request):
         if form.is_valid():
             identifier = form.cleaned_data['identifier'].strip()
             password = form.cleaned_data['password']
-
-            user = None
-
-            # Try username
             user = authenticate(request, username=identifier, password=password)
-
-            # Try email
             if user is None:
                 user_obj = User.objects.filter(email__iexact=identifier).first()
                 if user_obj:
                     user = authenticate(request, username=user_obj.username, password=password)
-
-            # Try phone number
             if user is None:
                 profile = Profile.objects.filter(phone_number=identifier).first()
                 if profile:
                     user = authenticate(request, username=profile.user.username, password=password)
-
             if user:
                 login(request, user)
                 return redirect('dashboard')
@@ -82,7 +69,6 @@ def custom_login(request):
                 messages.error(request, "❌ Invalid username, email, or phone number")
     else:
         form = CustomAuthenticationForm()
-
     return render(request, 'registration/login.html', {'form': form})
 
 # -----------------------------
@@ -94,15 +80,11 @@ def dashboard(request):
     search_query = request.GET.get('search', '').strip()
     selected_category = request.GET.get('category', '')
 
-    # Filter by search
     if search_query:
         menu_items = menu_items.filter(name__icontains=search_query)
-
-    # Filter by category if you add a 'category' field in MenuItem
     if selected_category:
         menu_items = menu_items.filter(category__iexact=selected_category)
 
-    # Convert price to XAF
     for item in menu_items:
         item.price_xaf = item.price * XAF_RATE
 
@@ -119,7 +101,8 @@ def dashboard(request):
 @login_required
 def place_order(request):
     if request.method == 'POST':
-        food_item = request.POST.get('food_item')
+        menu_item_id = request.POST.get('menu_item_id')
+        menu_item = get_object_or_404(MenuItem, id=menu_item_id)
         quantity = int(request.POST.get('quantity', 1))
         spice_level = request.POST.get('spice_level')
         salt_level = request.POST.get('salt_level')
@@ -127,16 +110,14 @@ def place_order(request):
 
         CartItem.objects.create(
             user=request.user,
-            food_item=food_item,
+            menu_item=menu_item,
             quantity=quantity,
             spice_level=spice_level,
             salt_level=salt_level,
             notes=notes,
             ordered=False
         )
-
-        messages.success(request, f"✅ '{food_item}' has been added to your cart!")
-
+        messages.success(request, f"✅ '{menu_item.name}' has been added to your cart!")
     return redirect('dashboard')
 
 # -----------------------------
@@ -145,10 +126,19 @@ def place_order(request):
 @login_required
 def cart(request):
     items = CartItem.objects.filter(user=request.user, ordered=False)
-    total = sum(item.quantity * item.food_item_price if hasattr(item, 'food_item_price') else 0 for item in items)
-    # If you want XAF total, multiply by XAF_RATE here
-    total_xaf = total * XAF_RATE
-    return render(request, 'cart.html', {'cart_items': items, 'total_xaf': total_xaf})
+
+    grand_total = 0
+    for item in items:
+        if item.menu_item:
+            item.total_price_xaf = item.menu_item.price * item.quantity * XAF_RATE
+            grand_total += item.total_price_xaf
+        else:
+            item.total_price_xaf = 0
+
+    return render(request, 'cart.html', {
+        'cart_items': items,
+        'grand_total': grand_total
+    })
 
 # -----------------------------
 # REMOVE FROM CART
@@ -161,7 +151,6 @@ def remove_from_cart(request, item_id):
         messages.success(request, "❌ Item removed from cart.")
     except CartItem.DoesNotExist:
         messages.error(request, "Item not found.")
-
     return redirect('cart')
 
 # -----------------------------
@@ -170,26 +159,21 @@ def remove_from_cart(request, item_id):
 @login_required
 def checkout(request):
     items = CartItem.objects.filter(user=request.user, ordered=False)
-
     if items.exists():
         for item in items:
             item.ordered = True
             item.save()
-
-            # Save to order history
             Order.objects.create(
                 user=item.user,
-                food_item=item.food_item,
+                menu_item=item.menu_item,
                 quantity=item.quantity,
                 spice_level=item.spice_level,
                 salt_level=item.salt_level,
                 notes=item.notes
             )
-
         messages.success(request, "🎉 Your order has been placed successfully!")
     else:
         messages.info(request, "Your cart is empty!")
-
     return redirect('dashboard')
 
 # -----------------------------
@@ -201,7 +185,7 @@ def order_history(request):
     return render(request, 'order_history.html', {'orders': orders})
 
 # -----------------------------
-# ABOUT PAGE VIEW
+# ABOUT PAGE
 # -----------------------------
 @login_required
 def about(request):

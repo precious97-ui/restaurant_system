@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from cloudinary.models import CloudinaryField
 
 # -----------------------------
 # ORDER MODEL
@@ -81,11 +82,9 @@ class MenuItem(models.Model):
     description = models.TextField(blank=True, null=True)
     price = models.DecimalField(max_digits=6, decimal_places=2)
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, blank=True, null=True)
-    spice_level_choices = [('Low', 'Low'), ('Medium', 'Medium'), ('Hot', 'Hot')]
-    salt_level_choices = [('Low', 'Low'), ('Normal', 'Normal'), ('Extra', 'Extra')]
-    default_spice = models.CharField(max_length=10, choices=spice_level_choices, default='Medium')
-    default_salt = models.CharField(max_length=10, choices=salt_level_choices, default='Normal')
-    image = models.ImageField(upload_to='menu_images/', blank=True, null=True)
+    default_spice = models.CharField(max_length=10, choices=[('Low','Low'),('Medium','Medium'),('Hot','Hot')], default='Medium')
+    default_salt = models.CharField(max_length=10, choices=[('Low','Low'),('Normal','Normal'),('Extra','Extra')], default='Normal')
+    image = CloudinaryField('image', blank=True, null=True)  # Cloudinary
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -110,7 +109,7 @@ class Profile(models.Model):
 class TeamMember(models.Model):
     name = models.CharField(max_length=100)
     role = models.CharField(max_length=100)
-    photo = models.ImageField(upload_to='team_photos/')
+    photo = CloudinaryField('photo', blank=True, null=True)  # Cloudinary
     bio = models.TextField(blank=True, null=True)
 
     def __str__(self):

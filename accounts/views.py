@@ -1,16 +1,14 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
-from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-
 from .models import Order, CartItem, MenuItem, Profile, TeamMember
 from .forms import CustomUserCreationForm, CustomAuthenticationForm
 
 # -----------------------------
 # XAF Conversion Rate
 # -----------------------------
-XAF_RATE = 600  # 1 USD = 600 XAF
+XAF_RATE = 600  # 1 USD = 600 XAF, adjust as needed
 
 # -----------------------------
 # DASHBOARD CATEGORIES
@@ -102,11 +100,16 @@ def dashboard(request):
 def place_order(request):
     if request.method == 'POST':
         menu_item_id = request.POST.get('menu_item_id')
-        menu_item = get_object_or_404(MenuItem, id=menu_item_id)
         quantity = int(request.POST.get('quantity', 1))
         spice_level = request.POST.get('spice_level')
         salt_level = request.POST.get('salt_level')
         notes = request.POST.get('notes')
+
+        try:
+            menu_item = MenuItem.objects.get(id=menu_item_id)
+        except MenuItem.DoesNotExist:
+            messages.error(request, "❌ Menu item does not exist.")
+            return redirect('dashboard')
 
         CartItem.objects.create(
             user=request.user,
@@ -126,8 +129,8 @@ def place_order(request):
 @login_required
 def cart(request):
     items = CartItem.objects.filter(user=request.user, ordered=False)
-
     grand_total = 0
+
     for item in items:
         if item.menu_item:
             item.total_price_xaf = item.menu_item.price * item.quantity * XAF_RATE
@@ -135,10 +138,7 @@ def cart(request):
         else:
             item.total_price_xaf = 0
 
-    return render(request, 'cart.html', {
-        'cart_items': items,
-        'grand_total': grand_total
-    })
+    return render(request, 'cart.html', {'cart_items': items, 'grand_total': grand_total})
 
 # -----------------------------
 # REMOVE FROM CART
@@ -159,21 +159,24 @@ def remove_from_cart(request, item_id):
 @login_required
 def checkout(request):
     items = CartItem.objects.filter(user=request.user, ordered=False)
-    if items.exists():
-        for item in items:
-            item.ordered = True
-            item.save()
-            Order.objects.create(
-                user=item.user,
-                menu_item=item.menu_item,
-                quantity=item.quantity,
-                spice_level=item.spice_level,
-                salt_level=item.salt_level,
-                notes=item.notes
-            )
-        messages.success(request, "🎉 Your order has been placed successfully!")
-    else:
+    if not items.exists():
         messages.info(request, "Your cart is empty!")
+        return redirect('dashboard')
+
+    for item in items:
+        item.ordered = True
+        item.save()
+
+        Order.objects.create(
+            user=item.user,
+            menu_item=item.menu_item,
+            quantity=item.quantity,
+            spice_level=item.spice_level,
+            salt_level=item.salt_level,
+            notes=item.notes
+        )
+
+    messages.success(request, "🎉 Your order has been placed successfully!")
     return redirect('dashboard')
 
 # -----------------------------

@@ -62,10 +62,26 @@
         {% for item in cart_items %}
             <div class="cart-item">
                 <div class="cart-item-details">
-                    <h3>{{ item.food_item }} x{{ item.quantity }}</h3>
+                    <h3>
+                        {% if item.menu_item %}
+                            {{ item.menu_item.name }}
+                        {% else %}
+                            Unknown
+                        {% endif %}
+                        x{{ item.quantity }}
+                    </h3>
+
+                    {% if item.menu_item %}
+                        {% if item.menu_item.image %}
+                            <img src="{{ item.menu_item.image.url }}" alt="{{ item.menu_item.name }}" style="max-width:150px; border-radius:10px; margin-bottom:10px;">
+                        {% endif %}
+                        <p>Price per item: {{ item.menu_item.price_xaf|floatformat:0 }} XAF</p>
+                    {% endif %}
+
                     <p>Spice: {{ item.spice_level }}, Salt: {{ item.salt_level }}</p>
-                    {% if item.notes %}<p>Notes: {{ item.notes }}</p>{% endif %}
-                    <p>Price per item: {{ item.price_xaf|floatformat:0 }} XAF</p>
+                    {% if item.notes %}
+                        <p>Notes: {{ item.notes }}</p>
+                    {% endif %}
                     <p><strong>Total: {{ item.total_price_xaf|floatformat:0 }} XAF</strong></p>
                 </div>
                 <div>

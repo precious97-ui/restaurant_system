@@ -1,0 +1,4 @@
+Django==6.0
+gunicorn
+cloudinary
+django-cloudinary-storage

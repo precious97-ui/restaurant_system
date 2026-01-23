@@ -9,14 +9,13 @@ class OrderAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'user',
-        'food_item',
+        'menu_item',  # updated here
         'quantity',
         'status',
         'created_at'
     )
     list_filter = ('status', 'created_at')
-    search_fields = ('user__username', 'food_item')
-
+    search_fields = ('user__username', 'menu_item__name')  # updated here
 
 # -----------------------------
 # CART ITEM ADMIN
@@ -26,7 +25,7 @@ class CartItemAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'user',
-        'food_item',
+        'menu_item',  # updated here
         'quantity',
         'spice_level',
         'salt_level',
@@ -34,8 +33,7 @@ class CartItemAdmin(admin.ModelAdmin):
         'added_at'
     )
     list_filter = ('ordered', 'spice_level', 'salt_level')
-    search_fields = ('user__username', 'food_item')
-
+    search_fields = ('user__username', 'menu_item__name')  # updated here
 
 # -----------------------------
 # MENU ITEM ADMIN
@@ -53,13 +51,11 @@ class MenuItemAdmin(admin.ModelAdmin):
     )
     list_filter = ('category', 'default_spice', 'default_salt', 'created_at')
     search_fields = ('name', 'description')
-    # Use dropdown for category in the admin form
     fieldsets = (
         (None, {
             'fields': ('name', 'description', 'category', 'price', 'default_spice', 'default_salt', 'image')
         }),
     )
-
 
 # -----------------------------
 # PROFILE ADMIN
@@ -68,7 +64,6 @@ class MenuItemAdmin(admin.ModelAdmin):
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'phone_number', 'email_verified')
     search_fields = ('user__username', 'phone_number')
-
 
 # -----------------------------
 # TEAM MEMBER ADMIN

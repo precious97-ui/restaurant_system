@@ -112,7 +112,8 @@
 
         <form method="post" action="{% url 'add_to_cart' %}">
             {% csrf_token %}
-            <input type="hidden" name="food_item" value="{{ item.name }}">
+            <!-- Send menu_item ID, not name -->
+            <input type="hidden" name="menu_item_id" value="{{ item.id }}">
 
             <label>Quantity</label>
             <input type="number" name="quantity" min="1" value="1">

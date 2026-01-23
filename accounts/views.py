@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
+from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import Order, CartItem, MenuItem, Profile, TeamMember
@@ -8,7 +9,7 @@ from .forms import CustomUserCreationForm, CustomAuthenticationForm
 # -----------------------------
 # XAF Conversion Rate
 # -----------------------------
-XAF_RATE = 600  # 1 USD = 600 XAF, adjust as needed
+XAF_RATE = 600  # 1 USD = 600 XAF
 
 # -----------------------------
 # DASHBOARD CATEGORIES
@@ -31,6 +32,7 @@ def signup(request):
             phone = form.cleaned_data.get('phone_number')
             if phone:
                 Profile.objects.create(user=user, phone_number=phone)
+
             login(request, user)
             messages.success(request, f"🎉 Welcome, {user.username}! Your account has been created.")
             return redirect('dashboard')
@@ -43,7 +45,7 @@ def signup(request):
     return render(request, 'registration/signup.html', {'form': form})
 
 # -----------------------------
-# LOGIN VIEW
+# LOGIN VIEW (simplified)
 # -----------------------------
 def custom_login(request):
     if request.method == 'POST':
@@ -51,15 +53,24 @@ def custom_login(request):
         if form.is_valid():
             identifier = form.cleaned_data['identifier'].strip()
             password = form.cleaned_data['password']
+
+            user = None
+
+            # Try login by username
             user = authenticate(request, username=identifier, password=password)
+
+            # If not username, try email
             if user is None:
                 user_obj = User.objects.filter(email__iexact=identifier).first()
                 if user_obj:
                     user = authenticate(request, username=user_obj.username, password=password)
+
+            # If not email, try phone
             if user is None:
                 profile = Profile.objects.filter(phone_number=identifier).first()
                 if profile:
                     user = authenticate(request, username=profile.user.username, password=password)
+
             if user:
                 login(request, user)
                 return redirect('dashboard')

@@ -11,4 +11,7 @@ urlpatterns = [
     path('checkout/', views.checkout, name='checkout'),
     path('orders/', views.order_history, name='order_history'),
     path('about/', views.about, name='about'),
+
+    # NEW URL for updating order status by staff/admin
+    path('update-order-status/<int:order_id>/', views.update_order_status, name='update_order_status'),
 ]

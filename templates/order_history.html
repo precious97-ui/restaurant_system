@@ -6,11 +6,17 @@
     <style>
         body { font-family: Arial, sans-serif; background: #fff8f0; margin: 0; padding: 0;}
         header { background: #ff6600; color: white; padding: 20px; text-align: center; font-size: 28px; font-weight: bold;}
-        .container { padding: 30px; max-width: 800px; margin: auto;}
+        .container { padding: 30px; max-width: 900px; margin: auto;}
         table { width: 100%; border-collapse: collapse; margin-top: 20px;}
         th, td { border: 1px solid #ccc; padding: 10px; text-align: center;}
         th { background: #ff6600; color: white;}
         tr:nth-child(even) { background: #fff3e0; }
+
+        /* Status colors */
+        .status-pending { background-color: #fff3b0; color: #856404; font-weight: bold; padding:5px 10px; border-radius:5px; }
+        .status-preparing { background-color: #ffe0b2; color: #e65100; font-weight: bold; padding:5px 10px; border-radius:5px; }
+        .status-delivered { background-color: #d4edda; color: #155724; font-weight: bold; padding:5px 10px; border-radius:5px; }
+
         footer { text-align: center; padding: 20px; background:#ffebd6; border-top:2px solid #ff9900; font-weight:bold; color:#ff6600; position: fixed; width:100%; bottom:0;}
     </style>
 </head>
@@ -29,23 +35,21 @@
                 <th>Salt 🧂</th>
                 <th>Notes</th>
                 <th>Date Ordered</th>
+                <th>Status</th>
             </tr>
         </thead>
         <tbody>
             {% for order in orders %}
             <tr>
-                <td>
-                    {% if order.menu_item %}
-                        {{ order.menu_item.name }}
-                    {% else %}
-                        Unknown
-                    {% endif %}
-                </td>
+                <td>{% if order.menu_item %}{{ order.menu_item.name }}{% else %}Unknown{% endif %}</td>
                 <td>{{ order.quantity }}</td>
                 <td>{{ order.spice_level }}</td>
                 <td>{{ order.salt_level }}</td>
                 <td>{{ order.notes|default:"-" }}</td>
                 <td>{{ order.created_at|date:"d M Y H:i" }}</td>
+                <td>
+                    <span class="status-{{ order.status }}">{{ order.status|capfirst }}</span>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

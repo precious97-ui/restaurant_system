@@ -1,8 +1,9 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
 from .models import Order, CartItem, MenuItem, Profile, TeamMember
 from .forms import CustomUserCreationForm, CustomAuthenticationForm
 
@@ -45,7 +46,7 @@ def signup(request):
     return render(request, 'registration/signup.html', {'form': form})
 
 # -----------------------------
-# LOGIN VIEW (simplified)
+# LOGIN VIEW
 # -----------------------------
 def custom_login(request):
     if request.method == 'POST':
@@ -55,17 +56,13 @@ def custom_login(request):
             password = form.cleaned_data['password']
 
             user = None
-
-            # Try login by username
             user = authenticate(request, username=identifier, password=password)
 
-            # If not username, try email
             if user is None:
                 user_obj = User.objects.filter(email__iexact=identifier).first()
                 if user_obj:
                     user = authenticate(request, username=user_obj.username, password=password)
 
-            # If not email, try phone
             if user is None:
                 profile = Profile.objects.filter(phone_number=identifier).first()
                 if profile:
@@ -195,7 +192,7 @@ def checkout(request):
 # -----------------------------
 @login_required
 def order_history(request):
-    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    orders = Order.objects.all().order_by('-created_at')  # Show all orders to staff
     return render(request, 'order_history.html', {'orders': orders})
 
 # -----------------------------
@@ -205,3 +202,37 @@ def order_history(request):
 def about(request):
     team_members = TeamMember.objects.all()
     return render(request, 'about.html', {'team_members': team_members})
+
+# -----------------------------
+# UPDATE ORDER STATUS (NEW)
+# -----------------------------
+@login_required
+def update_order_status(request, order_id):
+    if not request.user.is_staff:
+        messages.error(request, "❌ You are not authorized to update order status.")
+        return redirect('order_history')
+
+    order = get_object_or_404(Order, id=order_id)
+
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        if new_status in ['pending', 'preparing', 'delivered']:
+            order.status = new_status
+            order.save()
+
+            # Send email when order is delivered
+            if new_status == 'delivered':
+                profile = Profile.objects.filter(user=order.user).first()
+                if profile and order.user.email:
+                    send_mail(
+                        subject="🍔 Your order is delivered!",
+                        message=f"Hi {order.user.username}, your order '{order.menu_item.name}' has been delivered. Enjoy your meal!",
+                        from_email="foody@localhost",
+                        recipient_list=[order.user.email],
+                        fail_silently=True
+                    )
+
+            messages.success(request, f"✅ Order status updated to {new_status.capitalize()}.")
+        else:
+            messages.error(request, "❌ Invalid status.")
+    return redirect('order_history')

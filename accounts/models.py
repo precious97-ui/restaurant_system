@@ -31,6 +31,8 @@ class Order(models.Model):
     salt_level = models.CharField(max_length=10, choices=SALT_CHOICES)
     notes = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status_updated_at = models.DateTimeField(auto_now=True)       # ✅ Track when status last updated
+    email_sent = models.BooleanField(default=False)               # ✅ Track if "delivered" email was sent
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
